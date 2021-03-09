@@ -2,7 +2,7 @@ name: tester
 
 on:
   schedule:
-    - cron: "35 7,15 * * *"
+    - cron: "35 7,15,19 * * *"
   workflow_dispatch: {}
 
 jobs:
