@@ -29,8 +29,9 @@ jobs:
 
       - name: Get unique path
         run: |
-          unique_id=$(echo -n "$CLIENT_ID$CLIENT_SECRET" | md5sum | cut -d ' ' -f 1)
+          unique_id=$(echo -n "$CLIENT_ID2$CLIENT_SECRET2" | md5sum | cut -d ' ' -f 1)
           echo "TOKEN_PATH=$unique_id" >> $GITHUB_ENV
+          
       - name: Initial tester
         run: |
           if [ ! -f $token_{TOKEN_PATH}.txt ]; then
