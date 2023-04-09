@@ -29,8 +29,11 @@ jobs:
 
       - name: Get unique path
         run: |
-          unique_id=$(echo -n "$CLIENT_ID2$CLIENT_SECRET2" | md5sum | cut -d ' ' -f 1)
+          unique_id=$(echo -n "$CLIENT_ID$CLIENT_SECRET" | md5sum | cut -d ' ' -f 1)
           echo "TOKEN_PATH=$unique_id" >> $GITHUB_ENV
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID2 }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET2 }}
           
       - name: Initial tester
         run: |
