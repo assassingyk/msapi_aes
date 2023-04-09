@@ -37,16 +37,16 @@ jobs:
             python -c "import os,encrypt; encrypt.save(os.environ['REFRESH_TOKEN2'], os.environ['AES_KEY'])"
           fi
         env:
-          CLIENT_ID: ${{ secrets.CLIENT_ID2 }}
-          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET2 }}
-          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN2 }}
+          CLIENT_ID2: ${{ secrets.CLIENT_ID2 }}
+          CLIENT_SECRET2: ${{ secrets.CLIENT_SECRET2 }}
+          REFRESH_TOKEN2: ${{ secrets.REFRESH_TOKEN2 }}
           AES_KEY: ${{ secrets.AES_KEY }}
 
       - name: Test Api
         run: python main.py
         env:
-          CLIENT_ID: ${{ secrets.CLIENT_ID2 }}
-          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET2 }}
+          CLIENT_ID2: ${{ secrets.CLIENT_ID2 }}
+          CLIENT_SECRET2: ${{ secrets.CLIENT_SECRET2 }}
           AES_KEY: ${{ secrets.AES_KEY }}
 
       - name: Commit
