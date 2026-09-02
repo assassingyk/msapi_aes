@@ -1,0 +1,71 @@
+name: keepalive
+
+on:
+  schedule:
+    - cron: "35 8,16,20 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependency
+        run: pip3 install -r requirements.txt
+
+      - name: Get unique path
+        run: |
+          unique_id=$(echo -n "$CLIENT_ID$CLIENT_SECRET" | md5sum | cut -d ' ' -f 1)
+          echo "TOKEN_PATH=$unique_id" >> "$GITHUB_ENV"
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID2 }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET2 }}
+
+      # Only seeds the encrypted file on the very first run (or after a clean
+      # re-clone). Afterwards the file is the source of truth and every run
+      # refreshes it in place.
+      - name: Seed token file (first run only)
+        run: |
+          if [ ! -f "token_${TOKEN_PATH}.txt" ] && [ -n "$REFRESH_TOKEN" ]; then
+            python -c "import os,encrypt; encrypt.save(os.environ['REFRESH_TOKEN'], os.environ['AES_KEY'])"
+          fi
+        env:
+          REFRESH_TOKEN: ${{ secrets.REFRESH_TOKEN2 }}
+          AES_KEY: ${{ secrets.AES_KEY }}
+
+      - name: Keep alive (refresh token + call Graph)
+        run: python main.py
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID2 }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET2 }}
+          AES_KEY: ${{ secrets.AES_KEY }}
+          NOTIFY_SERVERCHAN_KEY: ${{ secrets.NOTIFY_SERVERCHAN_KEY }}
+          NOTIFY_BARK_KEY: ${{ secrets.NOTIFY_BARK_KEY }}
+          NOTIFY_TELEGRAM_BOT_TOKEN: ${{ secrets.NOTIFY_TELEGRAM_BOT_TOKEN }}
+          NOTIFY_TELEGRAM_CHAT_ID: ${{ secrets.NOTIFY_TELEGRAM_CHAT_ID }}
+          NOTIFY_WEBHOOK_URL: ${{ secrets.NOTIFY_WEBHOOK_URL }}
+
+      # Every successful run rewrites the encrypted token file (heartbeat), so
+      # this daily commit also keeps the repository active and prevents GitHub
+      # from disabling the scheduled workflow after 60 days without activity.
+      - name: Commit token file
+        run: |
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config user.name "${GITHUB_ACTOR}"
+          git add .
+          git commit -m "update refresh_token" || echo "nothing to commit"
+
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
