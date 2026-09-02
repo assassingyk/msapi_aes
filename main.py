@@ -18,16 +18,20 @@ if not (client_id and client_secret and aes_key):
 TOKEN_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
 APIROOT = 'https://graph.microsoft.com/v1.0'
 
+# NOTE: no /me/drive* or /sites* endpoints on purpose — this account's
+# OneDrive/SharePoint (drive) has been disabled by Microsoft due to past
+# over-use, and drive calls only produced 429/throttling noise.
 ENDPOINTS = [
-    '/me/drive/root',
-    '/me/drive',
-    '/drive/root',
     '/users',
+    '/me',
     '/me/messages',
+    '/me/mailFolders',
+    '/me/mailFolders/inbox',
     '/me/mailFolders/inbox/messageRules',
     '/me/mailFolders/Inbox/messages/delta',
-    '/me/drive/root/children',
-    '/me/mailFolders',
+    '/me/mailFolders/sentitems',
+    '/me/mailFolders/deleteditems',
+    '/me/mailboxSettings',
     '/me/outlook/masterCategories',
 ]
 
